@@ -6,7 +6,7 @@
     <title>Muscle Cheat - 정밀 AI 루틴 설계</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
                 <span id="welcome-msg" class="hidden"></span>
                 <button id="btn-login-modal" class="auth-btn">로그인</button>
                 <button id="btn-logout" class="auth-btn hidden">로그아웃</button>
-                <button id="btn-my-routines" class="auth-btn hidden">내 루틴 보기</button>
+                <button id="btn-my-routines" class="auth-btn hidden">내 루틴</button>
             </div>
             <h1>Muscle Cheat</h1>
             <p>신체 데이터 기반 정밀 AI 루틴 생성기</p>
@@ -25,27 +25,27 @@
         <main>
             <section class="input-section">
                 <form id="routine-form">
-                    <div class="section-title">👤 기본 신체 정보</div>
+                    <div class="section-title">기본 신체 정보</div>
                     <div class="input-grid">
                         <div class="form-group">
-                            <label for="age">나이 (세)</label>
-                            <input type="number" id="age" value="35" required>
+                            <label for="age">나이</label>
+                            <input type="number" id="age" value="35" required placeholder="세">
                         </div>
                         <div class="form-group">
-                            <label for="height">키 (cm)</label>
-                            <input type="number" id="height" value="175" required>
+                            <label for="height">키</label>
+                            <input type="number" id="height" value="175" required placeholder="cm">
                         </div>
                         <div class="form-group">
-                            <label for="weight">체중 (kg)</label>
-                            <input type="number" id="weight" value="75" required>
+                            <label for="weight">체중</label>
+                            <input type="number" id="weight" value="75" required placeholder="kg">
                         </div>
                         <div class="form-group">
-                            <label for="bmi">BMI 지수 (자동계산)</label>
-                            <input type="text" id="bmi" readonly class="highlight-input">
+                            <label for="bmi">BMI 지수</label>
+                            <input type="text" id="bmi" readonly class="highlight-input" placeholder="자동계산">
                         </div>
                     </div>
 
-                    <div class="section-title" style="margin-top: 1.5rem;">🎯 운동 수준 및 목표</div>
+                    <div class="section-title" style="margin-top: 1.75rem;">운동 수준 및 목표</div>
                     <div class="input-grid">
                         <div class="form-group">
                             <label for="level">운동 수준</label>
@@ -82,8 +82,10 @@
                     </div>
 
                     <button type="submit" class="generate-btn">
-                        <span>맞춤 루틴 찾기</span>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        <span>맞춤 루틴 생성</span>
                     </button>
                 </form>
             </section>
@@ -91,7 +93,7 @@
             <section id="result-section" class="result-section hidden">
                 <div class="loader" id="loader">
                     <div class="spinner"></div>
-                    <p>신체 데이터를 바탕으로 최적의 프로토콜을 설계 중입니다...</p>
+                    <p>신체 데이터를 분석하고 최적의 프로토콜을 설계 중...</p>
                 </div>
                 <div id="routine-content" class="hidden">
                     <!-- Routine will be rendered here -->
@@ -100,14 +102,14 @@
         </main>
     </div>
 
-    <!-- Login/Signup Modal -->
+    <!-- Login Modal -->
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2 id="modal-title">로그인</h2>
+            <h2>로그인</h2>
             <form id="auth-form">
-                <input type="text" id="username" placeholder="당신의 닉네임 (가입 없이 바로 입력)" required>
-                <button type="submit" id="auth-submit-btn">로그인 및 시작</button>
+                <input type="text" id="username" placeholder="닉네임을 입력하세요" required>
+                <button type="submit" id="auth-submit-btn">시작하기</button>
             </form>
         </div>
     </div>
@@ -116,7 +118,7 @@
     <div id="routines-modal" class="modal hidden">
         <div class="modal-content large-modal">
             <span class="close-routines-modal">&times;</span>
-            <h2>내 보관함 (저장된 루틴)</h2>
+            <h2>저장된 루틴</h2>
             <div id="saved-routines-container">
                 <p>로딩 중...</p>
             </div>
