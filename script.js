@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const routineContent = document.getElementById('routine-content');
     
     // Auth UI
-    const authBar = document.getElementById('auth-bar');
     const welcomeMsg = document.getElementById('welcome-msg');
     const btnLoginModal = document.getElementById('btn-login-modal');
     const btnLogout = document.getElementById('btn-logout');
@@ -20,9 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auth Form
     const authForm = document.getElementById('auth-form');
     const usernameInput = document.getElementById('username');
-    const modalTitle = document.getElementById('modal-title');
-    
-    modalTitle.textContent = '가상 로그인';
 
     let currentGeneratedRoutine = null;
     let currentGeneratedGoal = null;
@@ -31,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAuth() {
         const username = localStorage.getItem('mc_username');
         if (username) {
-            welcomeMsg.textContent = `${username}님 환영합니다!`;
+            welcomeMsg.textContent = `${username}님`;
             welcomeMsg.classList.remove('hidden');
             btnLoginModal.classList.add('hidden');
             btnLogout.classList.remove('hidden');
@@ -49,10 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnLoginModal.addEventListener('click', () => authModal.classList.remove('hidden'));
     closeModal.addEventListener('click', () => authModal.classList.add('hidden'));
+    
+    // Close modal on backdrop click
+    authModal.addEventListener('click', (e) => {
+        if (e.target === authModal) authModal.classList.add('hidden');
+    });
+    routinesModal.addEventListener('click', (e) => {
+        if (e.target === routinesModal) routinesModal.classList.add('hidden');
+    });
+
     btnLogout.addEventListener('click', () => {
         localStorage.removeItem('mc_username');
         checkAuth();
-        alert('로그아웃 되었습니다.');
         const saveBtn = document.getElementById('save-routine-btn');
         if(saveBtn) saveBtn.remove();
     });
@@ -60,13 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
     authForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const username = usernameInput.value.trim();
-        if(!username) return alert('닉네임을 입력해주세요.');
+        if(!username) return;
         
         localStorage.setItem('mc_username', username);
         checkAuth();
         authModal.classList.add('hidden');
         usernameInput.value = '';
-        alert('환영합니다!');
     });
 
     // --- My Routines ---
@@ -77,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedData = JSON.parse(localStorage.getItem('mc_routines') || '[]');
         
         if(savedData.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">저장된 루틴이 없습니다.</p>';
+            container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 3rem 0;">저장된 루틴이 없습니다.</p>';
             return;
         }
         
@@ -86,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(item.created_at).toLocaleDateString('ko-KR');
             html += `
             <div class="saved-routine-item">
-                <h3 style="color: var(--accent-color); margin-bottom: 1rem;">[${date}] ${item.goal} 프로토콜</h3>
+                <h3>${item.goal} 프로토콜 · ${date}</h3>
             `;
             item.routine_data.routines.forEach(day => {
                 html += `<div><strong>${day.day}</strong>: ${day.exercises.map(e=>e.name).join(', ')}</div>`;
@@ -142,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loader.classList.add('hidden');
             routineContent.classList.remove('hidden');
             resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 1200);
+        }, 1500);
     });
 
     function generateClaudeStyleRoutine(data) {
@@ -220,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         ex.tag = "허리 부담 감소"; ex.reps = "10~12회";
                     }
                 }
-                // 추천 중량 계산
                 ex.targetWeight = calculateWeight(ex.name, data.weight, data.level, data.goal);
             });
         });
@@ -235,13 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateWeight(name, bw, level, goal) {
         const n = name;
-        // 맨몸 운동
         const bodyweight = ["플랭크", "크런치", "트라이셉스 딥스", "풀업"];
         if (bodyweight.some(k => n.includes(k))) return "맨몸";
 
-        // 레벨 계수
         const lvl = level === "초급" ? 0.5 : level === "중급" ? 0.8 : 1.1;
-        // 목표별 미세 보정 (스트렝스 ↑, 다이어트 ↓)
         const goalMult = goal === "스트렝스" ? 1.15 : goal === "다이어트" ? 0.85 : 1.0;
 
         let ratio;
@@ -257,25 +256,26 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (n.includes("바벨 컬"))                                                     ratio = 0.25;
         else ratio = 0.3;
 
-        const kg = Math.round((bw * lvl * ratio * goalMult) / 2.5) * 2.5; // 2.5kg 단위 반올림
+        const kg = Math.round((bw * lvl * ratio * goalMult) / 2.5) * 2.5;
         return `${kg}kg`;
     }
 
     function renderRoutine(data, rawInput) {
         let html = `
-        <div style="margin-bottom: 2.5rem;">
-            <h3 style="color: var(--accent-color); font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 800;">🔥 ${rawInput.goal} 표준 프로토콜 완성</h3>
-            <p style="color: var(--text-secondary); font-size: 1.05rem;">
-                신체 스펙 (나이 ${rawInput.age}세, BMI ${rawInput.bmi}) 및 <strong>${rawInput.level}</strong> 수준을 모두 반영한 주 ${rawInput.frequency}회 (${rawInput.duration}분) 맞춤형 구성입니다.
+        <div style="margin-bottom: 2rem;">
+            <h3 style="color: var(--accent-primary); font-size: 1.35rem; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.02em;">${rawInput.goal} 프로토콜</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                ${rawInput.age}세 · BMI ${rawInput.bmi} · ${rawInput.level} 기준<br>
+                주 ${rawInput.frequency}회 · ${rawInput.duration}분 세션
             </p>
         </div>`;
 
         data.routines.forEach((day, index) => {
             html += `
-            <div class="day-card" style="animation-delay: ${index * 0.1}s">
+            <div class="day-card" style="animation-delay: ${index * 0.08}s">
                 <div class="day-header">
-                    ${day.day} 
-                    <span style="font-size: 0.9rem; color: #a1a1aa; font-weight: 400; margin-left: auto; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 4px;">${day.count}</span>
+                    ${day.day}
+                    <span>${day.count}</span>
                 </div>
                 <div class="exercise-list">
                     ${day.exercises.map(ex => `
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="meta-item"><span class="meta-label">Sets</span><span class="meta-value">${ex.sets}</span></div>
                                 <div class="meta-item"><span class="meta-label">Reps</span><span class="meta-value">${ex.reps}</span></div>
                                 <div class="meta-item"><span class="meta-label">Rest</span><span class="meta-value">${ex.rest}</span></div>
-                                <div class="meta-item"><span class="meta-label">추천 중량</span><span class="meta-value weight-highlight">${ex.targetWeight}</span></div>
+                                <div class="meta-item"><span class="meta-label">중량</span><span class="meta-value weight-highlight">${ex.targetWeight}</span></div>
                             </div>
                         </div>
                     `).join('')}
@@ -297,26 +297,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         html += `
-        <div class="nutrition-card" style="animation-delay: ${data.routines.length * 0.1 + 0.1}s; animation: slideUp 0.4s ease-out forwards; opacity: 0;">
-            <div class="nutrition-title">
-                📋 정밀 영양 가이드
-            </div>
+        <div class="nutrition-card" style="animation-delay: ${data.routines.length * 0.08 + 0.1}s; animation: fadeInUp 0.4s ease-out forwards; opacity: 0;">
+            <div class="nutrition-title">영양 가이드</div>
             <div class="nutrition-content">
-                • <strong>칼로리 설정:</strong> 유지 칼로리 기준 <strong>${data.nutrition.surplus} kcal</strong> 잉여 섭취<br>
-                • <strong>목표 단백질:</strong> 하루 약 <strong>${data.nutrition.protein}g</strong> 섭취 권장 (체중 × ${data.goal === '근비대'? '2.0~2.2':'1.8~2.2'}g)<br>
-                • <strong>식단 포인트:</strong> ${data.nutrition.carbFocus}
+                <strong>칼로리:</strong> 유지 칼로리 기준 ${data.nutrition.surplus} kcal<br>
+                <strong>단백질:</strong> 하루 약 ${data.nutrition.protein}g 권장<br>
+                <strong>식단:</strong> ${data.nutrition.carbFocus}
             </div>
         </div>
         `;
         
         routineContent.innerHTML = html;
 
-        // Add save button if user is logged in (mock)
         if(localStorage.getItem('mc_username')) {
             const saveBtn = document.createElement('button');
             saveBtn.id = 'save-routine-btn';
             saveBtn.className = 'save-routine-btn';
-            saveBtn.textContent = '이 루틴 로컬 기기에 저장하기';
+            saveBtn.textContent = '이 루틴 저장하기';
             
             saveBtn.addEventListener('click', () => {
                 const savedRoutines = JSON.parse(localStorage.getItem('mc_routines') || '[]');
@@ -326,9 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     created_at: new Date().toISOString()
                 });
                 localStorage.setItem('mc_routines', JSON.stringify(savedRoutines));
-                alert('해당 기기에 루틴이 안전하게 보관되었습니다!');
-                saveBtn.textContent = '저장됨 ✓';
+                saveBtn.textContent = '저장 완료 ✓';
                 saveBtn.disabled = true;
+                saveBtn.style.background = 'var(--text-muted)';
             });
             routineContent.appendChild(saveBtn);
         }
