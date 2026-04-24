@@ -20,20 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auth Form
     const authForm = document.getElementById('auth-form');
     const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const authSubmitBtn = document.getElementById('auth-submit-btn');
     const modalTitle = document.getElementById('modal-title');
-    const switchAuthMode = document.getElementById('switch-auth-mode');
     
-    let isLoginMode = true;
+    modalTitle.textContent = '가상 로그인';
+
     let currentGeneratedRoutine = null;
     let currentGeneratedGoal = null;
 
     // --- Authentication Logic ---
     function checkAuth() {
-        const token = localStorage.getItem('mc_token');
         const username = localStorage.getItem('mc_username');
-        if (token && username) {
+        if (username) {
             welcomeMsg.textContent = `${username}님 환영합니다!`;
             welcomeMsg.classList.remove('hidden');
             btnLoginModal.classList.add('hidden');
@@ -53,89 +50,52 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLoginModal.addEventListener('click', () => authModal.classList.remove('hidden'));
     closeModal.addEventListener('click', () => authModal.classList.add('hidden'));
     btnLogout.addEventListener('click', () => {
-        localStorage.removeItem('mc_token');
         localStorage.removeItem('mc_username');
         checkAuth();
         alert('로그아웃 되었습니다.');
-        // Remove save button if present
         const saveBtn = document.getElementById('save-routine-btn');
         if(saveBtn) saveBtn.remove();
     });
-    
-    switchAuthMode.addEventListener('click', () => {
-        isLoginMode = !isLoginMode;
-        modalTitle.textContent = isLoginMode ? '로그인' : '회원가입';
-        authSubmitBtn.textContent = isLoginMode ? '로그인' : '회원가입 완료';
-        switchAuthMode.textContent = isLoginMode ? '회원가입' : '로그인으로 돌아가기';
-    });
 
-    authForm.addEventListener('submit', async (e) => {
+    authForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const url = isLoginMode ? '/api/login' : '/api/signup';
-        try {
-            const res = await fetch(`http://localhost:3000${url}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value })
-            });
-            
-            const data = await res.json();
-            if (res.ok) {
-                if (isLoginMode) {
-                    localStorage.setItem('mc_token', data.token);
-                    localStorage.setItem('mc_username', data.username);
-                    checkAuth();
-                    authModal.classList.add('hidden');
-                    usernameInput.value = '';
-                    passwordInput.value = '';
-                    alert('로그인 성공!');
-                } else {
-                    alert('회원가입 성공! 이제 로그인해주세요.');
-                    switchAuthMode.click(); // switch to login mode
-                }
-            } else {
-                alert(data.error);
-            }
-        } catch(err) {
-            alert("서버 연결 실패. 서버가 켜져있는지 확인하세요.");
-        }
+        const username = usernameInput.value.trim();
+        if(!username) return alert('닉네임을 입력해주세요.');
+        
+        localStorage.setItem('mc_username', username);
+        checkAuth();
+        authModal.classList.add('hidden');
+        usernameInput.value = '';
+        alert('환영합니다!');
     });
 
     // --- My Routines ---
-    btnMyRoutines.addEventListener('click', async () => {
+    btnMyRoutines.addEventListener('click', () => {
         routinesModal.classList.remove('hidden');
         const container = document.getElementById('saved-routines-container');
-        container.innerHTML = '<p>불러오는 중...</p>';
         
-        try {
-            const res = await fetch('http://localhost:3000/api/routines', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('mc_token')}` }
-            });
-            const data = await res.json();
-            
-            if(data.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">저장된 루틴이 없습니다.</p>';
-                return;
-            }
-            
-            let html = '';
-            data.forEach(item => {
-                const date = new Date(item.created_at).toLocaleDateString('ko-KR');
-                html += `
-                <div class="saved-routine-item">
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">[${date}] ${item.goal} 프로토콜</h3>
-                `;
-                item.routine_data.routines.forEach(day => {
-                    html += `<div><strong>${day.day}</strong>: ${day.exercises.map(e=>e.name).join(', ')}</div>`;
-                });
-                html += `</div>`;
-            });
-            container.innerHTML = html;
-            
-        } catch(err) {
-            container.innerHTML = '<p>오류가 발생했습니다.</p>';
+        const savedData = JSON.parse(localStorage.getItem('mc_routines') || '[]');
+        
+        if(savedData.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">저장된 루틴이 없습니다.</p>';
+            return;
         }
+        
+        let html = '';
+        savedData.reverse().forEach(item => {
+            const date = new Date(item.created_at).toLocaleDateString('ko-KR');
+            html += `
+            <div class="saved-routine-item">
+                <h3 style="color: var(--accent-color); margin-bottom: 1rem;">[${date}] ${item.goal} 프로토콜</h3>
+            `;
+            item.routine_data.routines.forEach(day => {
+                html += `<div><strong>${day.day}</strong>: ${day.exercises.map(e=>e.name).join(', ')}</div>`;
+            });
+            html += `</div>`;
+        });
+        container.innerHTML = html;
     });
+    
     closeRoutinesModal.addEventListener('click', () => routinesModal.classList.add('hidden'));
 
     // --- Routine Generation Logic ---
@@ -301,33 +261,24 @@ document.addEventListener('DOMContentLoaded', () => {
         
         routineContent.innerHTML = html;
 
-        // Add save button if user is logged in
-        if(localStorage.getItem('mc_token')) {
+        // Add save button if user is logged in (mock)
+        if(localStorage.getItem('mc_username')) {
             const saveBtn = document.createElement('button');
             saveBtn.id = 'save-routine-btn';
             saveBtn.className = 'save-routine-btn';
-            saveBtn.textContent = '이 루틴 내 보관함에 저장하기';
+            saveBtn.textContent = '이 루틴 로컬 기기에 저장하기';
             
-            saveBtn.addEventListener('click', async () => {
-                try {
-                    const res = await fetch('http://localhost:3000/api/routines', {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('mc_token')}`
-                        },
-                        body: JSON.stringify({ goal: currentGeneratedGoal, routine_data: currentGeneratedRoutine })
-                    });
-                    if(res.ok) {
-                        alert('저장 완료! 내 루틴 보기에서 확인하세요.');
-                        saveBtn.textContent = '저장됨 ✓';
-                        saveBtn.disabled = true;
-                    } else {
-                        alert('저장에 실패했습니다.');
-                    }
-                } catch(e) {
-                    alert('서버 연결 오류');
-                }
+            saveBtn.addEventListener('click', () => {
+                const savedRoutines = JSON.parse(localStorage.getItem('mc_routines') || '[]');
+                savedRoutines.push({
+                    goal: currentGeneratedGoal,
+                    routine_data: currentGeneratedRoutine,
+                    created_at: new Date().toISOString()
+                });
+                localStorage.setItem('mc_routines', JSON.stringify(savedRoutines));
+                alert('해당 기기에 루틴이 안전하게 보관되었습니다!');
+                saveBtn.textContent = '저장됨 ✓';
+                saveBtn.disabled = true;
             });
             routineContent.appendChild(saveBtn);
         }
