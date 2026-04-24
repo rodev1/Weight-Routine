@@ -220,6 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         ex.tag = "허리 부담 감소"; ex.reps = "10~12회";
                     }
                 }
+                // 추천 중량 계산
+                ex.targetWeight = calculateWeight(ex.name, data.weight, data.level, data.goal);
             });
         });
 
@@ -229,6 +231,34 @@ document.addEventListener('DOMContentLoaded', () => {
         let carbFocus = data.goal === "다이어트" ? "단백질 중심, 정제 탄수화물 엄격히 제한" : "탄수화물 중심 (운동 전후 필수 섭취)";
 
         return { routines: adjusted, nutrition: { surplus, protein, carbFocus } };
+    }
+
+    function calculateWeight(name, bw, level, goal) {
+        const n = name;
+        // 맨몸 운동
+        const bodyweight = ["플랭크", "크런치", "트라이셉스 딥스", "풀업"];
+        if (bodyweight.some(k => n.includes(k))) return "맨몸";
+
+        // 레벨 계수
+        const lvl = level === "초급" ? 0.5 : level === "중급" ? 0.8 : 1.1;
+        // 목표별 미세 보정 (스트렝스 ↑, 다이어트 ↓)
+        const goalMult = goal === "스트렝스" ? 1.15 : goal === "다이어트" ? 0.85 : 1.0;
+
+        let ratio;
+        if (n.includes("백스쿼트") || n.includes("레그프레스") || n.includes("고블릿"))  ratio = 1.5;
+        else if (n.includes("데드리프트") || n.includes("루마니안"))                       ratio = 1.4;
+        else if (n.includes("레그 프레스"))                                                 ratio = 1.6;
+        else if (n.includes("로우"))                                                        ratio = 0.9;
+        else if (n.includes("벤치프레스") || n.includes("인클라인"))                        ratio = 0.85;
+        else if (n.includes("오버헤드") || n.includes("숄더 프레스"))                       ratio = 0.5;
+        else if (n.includes("랫풀다운") || n.includes("케이블 크런치") || n.includes("케이블 푸시다운") || n.includes("페이스 풀")) ratio = 0.35;
+        else if (n.includes("레그 익스텐션") || n.includes("레그 컬"))                      ratio = 0.4;
+        else if (n.includes("덤벨 플라이") || n.includes("사이드 레터럴") || n.includes("덤벨 컬")) ratio = 0.15;
+        else if (n.includes("바벨 컬"))                                                     ratio = 0.25;
+        else ratio = 0.3;
+
+        const kg = Math.round((bw * lvl * ratio * goalMult) / 2.5) * 2.5; // 2.5kg 단위 반올림
+        return `${kg}kg`;
     }
 
     function renderRoutine(data, rawInput) {
@@ -258,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="meta-item"><span class="meta-label">Sets</span><span class="meta-value">${ex.sets}</span></div>
                                 <div class="meta-item"><span class="meta-label">Reps</span><span class="meta-value">${ex.reps}</span></div>
                                 <div class="meta-item"><span class="meta-label">Rest</span><span class="meta-value">${ex.rest}</span></div>
+                                <div class="meta-item"><span class="meta-label">추천 중량</span><span class="meta-value weight-highlight">${ex.targetWeight}</span></div>
                             </div>
                         </div>
                     `).join('')}
