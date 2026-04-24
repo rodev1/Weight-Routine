@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nutrition: { surplus, protein, carbFocus },
             profileNotes
         };
-
+    }  // end generateClaudeStyleRoutine
 
     function renderRoutine(data, rawInput) {
         const notes = data.profileNotes || [];
