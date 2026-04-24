@@ -145,129 +145,207 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1200);
     });
 
+    // ============================================================
+    // 운동 과학 기반 데이터베이스 (level: 0=초급, 1=중급, 2=고급)
+    // maxAge: 이 나이 초과 시 비권장 / maxBMI: 이 BMI 초과 시 비권장
+    // ============================================================
+    const EXERCISE_DB = {
+        push: [
+            { name: "머신 체스트 프레스", tag: "가슴·고안정성·머신", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.7 },
+            { name: "덤벨 벤치프레스", tag: "가슴·안정성 양호", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.75 },
+            { name: "바벨 벤치프레스", tag: "가슴·다관절 복합", level: 1, maxAge: 99, maxBMI: 99, wRatio: 0.85 },
+            { name: "인클라인 덤벨 프레스", tag: "윗가슴 집중", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.65 },
+            { name: "인클라인 바벨 프레스", tag: "윗가슴·고강도", level: 2, maxAge: 60, maxBMI: 35, wRatio: 0.75 },
+            { name: "케이블 크로스오버", tag: "가슴 고립·관절 보호", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.3 },
+            { name: "머신 숄더 프레스", tag: "어깨·고안정성", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.45 },
+            { name: "덤벨 숄더 프레스", tag: "어깨·안정성", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.4 },
+            { name: "바벨 오버헤드 프레스", tag: "전삼각·복합", level: 1, maxAge: 50, maxBMI: 35, wRatio: 0.5 },
+            { name: "사이드 레터럴 레이즈", tag: "측면 삼각근", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.12 },
+            { name: "케이블 사이드 레이즈", tag: "측면 삼각근·일정 긴장", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.12 },
+            { name: "케이블 푸시다운", tag: "삼두 고립", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.3 },
+            { name: "오버헤드 덤벨 익스텐션", tag: "삼두 장두 집중", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.15 },
+            { name: "트라이셉스 딥스", tag: "삼두 체중 복합", level: 1, maxAge: 55, maxBMI: 28, wRatio: 0, bodyweight: true }
+        ],
+        pull: [
+            { name: "랫풀다운", tag: "광배·입문자 친화적", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.7 },
+            { name: "케이블 시티드 로우", tag: "등 두께·관절 친화적", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.75 },
+            { name: "덤벨 원암 로우", tag: "광배·단측 집중", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.35 },
+            { name: "바벨 벤트오버 로우", tag: "등 두께·복합", level: 1, maxAge: 55, maxBMI: 35, wRatio: 0.9 },
+            { name: "풀업", tag: "광배·체중 복합", level: 1, maxAge: 99, maxBMI: 26, wRatio: 0, bodyweight: true },
+            { name: "가중 풀업", tag: "광배·고강도", level: 2, maxAge: 50, maxBMI: 24, wRatio: 0.2 },
+            { name: "T바 로우", tag: "등 중간·복합", level: 1, maxAge: 55, maxBMI: 35, wRatio: 0.8 },
+            { name: "페이스 풀", tag: "후면 삼각근·회전근개 보호", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.25 },
+            { name: "덤벨 컬", tag: "이두 고립", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.15 },
+            { name: "바벨 컬", tag: "이두 복합", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.25 },
+            { name: "해머 컬", tag: "이두·완요골근 복합", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.18 }
+        ],
+        legs: [
+            { name: "레그 프레스", tag: "대퇴·고안정성·머신", level: 0, maxAge: 99, maxBMI: 99, wRatio: 1.8 },
+            { name: "핵 스쿼트 머신", tag: "대퇴·허리 부담 최소", level: 0, maxAge: 99, maxBMI: 40, wRatio: 1.3 },
+            { name: "고블릿 스쿼트", tag: "하체·자세 학습", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.35 },
+            { name: "바벨 백스쿼트", tag: "하체 대표 복합", level: 1, maxAge: 55, maxBMI: 32, wRatio: 1.5 },
+            { name: "바벨 프론트스쿼트", tag: "대퇴·코어 집중", level: 2, maxAge: 50, maxBMI: 30, wRatio: 1.2 },
+            { name: "불가리안 스플릿 스쿼트", tag: "단관절·균형·밸런스", level: 1, maxAge: 55, maxBMI: 30, wRatio: 0.3 },
+            { name: "트랩바 데드리프트", tag: "전신·허리 친화적", level: 1, maxAge: 65, maxBMI: 35, wRatio: 1.4 },
+            { name: "루마니안 데드리프트", tag: "햄스트링·허리 부담↓", level: 0, maxAge: 99, maxBMI: 38, wRatio: 1.0 },
+            { name: "컨벤셔널 데드리프트", tag: "전신 복합·고강도", level: 2, maxAge: 50, maxBMI: 30, wRatio: 1.5 },
+            { name: "레그 익스텐션", tag: "대퇴사두 고립", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.4 },
+            { name: "레그 컬", tag: "햄스트링 고립", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.35 },
+            { name: "스탠딩 카프 레이즈", tag: "종아리", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.9 }
+        ],
+        core: [
+            { name: "플랭크", tag: "코어 안정화·허리 보호", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0, bodyweight: true },
+            { name: "데드버그", tag: "코어 심부·허리 보호", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0, bodyweight: true },
+            { name: "케이블 크런치", tag: "복직근·저충격", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.35 },
+            { name: "행잉 레그레이즈", tag: "하복부 집중", level: 1, maxAge: 60, maxBMI: 28, wRatio: 0, bodyweight: true },
+            { name: "Ab 휠 롤아웃", tag: "코어 전체·고강도", level: 2, maxAge: 55, maxBMI: 26, wRatio: 0, bodyweight: true }
+        ]
+    };
+
     function generateClaudeStyleRoutine(data) {
-        let baseExercises = {
-            push: [
-                {name: "바벨 벤치프레스", tag: "다관절·주동근", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "바벨 오버헤드 프레스", tag: "전삼각·복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "덤벨 숄더 프레스", tag: "안정성 요구", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "트라이셉스 딥스", tag: "삼두 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "케이블 푸시다운", tag: "삼두 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-            ],
-            pull: [
-                {name: "풀업 (가중)", tag: "광배·복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "바벨 로우", tag: "등 두께", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "바벨 데드리프트", tag: "전신 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "바벨 컬", tag: "이두 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "덤벨 컬", tag: "이두 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-            ],
-            legs: [
-                {name: "바벨 백스쿼트", tag: "하체 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "레그 프레스", tag: "머신·대퇴", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "레그 익스텐션", tag: "대퇴사두 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "레그 컬", tag: "햄스트링 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-            ],
-            core: [
-                {name: "케이블 크런치", tag: "복직근 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                {name: "플랭크", tag: "코어 안정화", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-            ]
+        // ── 1. 사용자 프로파일 숫자화 ──────────────────────────
+        const lvlNum = data.level === '초급' ? 0 : data.level === '중급' ? 1 : 2;
+
+        // ── 2. 운동 필터링 함수 ────────────────────────────────
+        // 나이, BMI, 구력 3가지 조건을 AND로 교차 적용
+        function filter(pool) {
+            return pool.filter(ex =>
+                ex.level <= lvlNum &&
+                data.age <= ex.maxAge &&
+                data.bmi <= ex.maxBMI
+            );
+        }
+
+        const avail = {
+            push: filter(EXERCISE_DB.push),
+            pull:  filter(EXERCISE_DB.pull),
+            legs:  filter(EXERCISE_DB.legs),
+            core:  filter(EXERCISE_DB.core)
         };
 
+        // ── 3. 운동 시간에 따른 하루 종목 수 결정 ──────────────
+        // 1세트 소요 시간(휴식 포함) ≈ 2~3분 기준
+        const exCount = data.duration === 40 ? 3 : data.duration === 60 ? 4 : 5;
+
+        // ── 4. 주당 빈도별 분할 구성 ───────────────────────────
+        function pick(pool, n) {
+            return pool.slice(0, Math.min(n, pool.length));
+        }
+
         let template = [];
-        
         if (data.frequency === 3) {
+            // PPL 3분할 (Push / Pull / Legs)
             template = [
-                { day: "Day 1 — 밀기 (가슴/어깨/삼두)", exercises: [...baseExercises.push] },
-                { day: "Day 2 — 당기기 (등/이두)", exercises: [...baseExercises.pull] },
-                { day: "Day 3 — 하체 + 코어", exercises: [...baseExercises.legs, ...baseExercises.core] }
+                { day: "Day 1 — 밀기 (가슴 / 어깨 / 삼두)", exercises: pick(avail.push, exCount) },
+                { day: "Day 2 — 당기기 (등 / 이두)", exercises: pick(avail.pull, exCount) },
+                { day: "Day 3 — 하체 + 코어", exercises: [...pick(avail.legs, exCount - 1), pick(avail.core, 1)[0]].filter(Boolean) }
             ];
         } else if (data.frequency === 4) {
+            // 상하체 4분할 (Upper / Lower / Upper / Lower)
+            const half = Math.ceil(exCount / 2);
             template = [
-                { day: "Day 1 — 상체 (밀기 중심)", exercises: [baseExercises.push[0], baseExercises.push[1], baseExercises.pull[0], baseExercises.push[3], baseExercises.pull[3]] },
-                { day: "Day 2 — 하체 + 코어", exercises: [...baseExercises.legs, ...baseExercises.core] },
-                { day: "Day 3 — 상체 (당기기 중심)", exercises: [baseExercises.pull[1], baseExercises.pull[2], baseExercises.push[2], baseExercises.pull[4], baseExercises.push[4]] },
-                { day: "Day 4 — 하체 집중", exercises: [...baseExercises.legs] }
+                { day: "Day 1 — 상체 (밀기 중심)", exercises: [...pick(avail.push, half + 1), ...pick(avail.pull, half - 1)] },
+                { day: "Day 2 — 하체 + 코어", exercises: [...pick(avail.legs, exCount - 1), pick(avail.core, 1)[0]].filter(Boolean) },
+                { day: "Day 3 — 상체 (당기기 중심)", exercises: [...pick(avail.pull, half + 1), ...pick(avail.push.slice(half + 1), half - 1)] },
+                { day: "Day 4 — 하체 집중", exercises: pick(avail.legs, exCount) }
             ];
         } else if (data.frequency === 5) {
+            // 5분할 (가슴 / 등 / 하체 / 어깨 / 팔+코어)
+            const chestPush = avail.push.filter(e => e.tag.includes('가슴'));
+            const shoulder  = avail.push.filter(e => e.tag.includes('어깨') || e.tag.includes('삼각'));
+            const tricep    = avail.push.filter(e => e.tag.includes('삼두'));
+            const bicep     = avail.pull.filter(e => e.tag.includes('이두'));
+            const backPull  = avail.pull.filter(e => !e.tag.includes('이두'));
             template = [
-                { day: "Day 1 — 가슴 집중", exercises: [baseExercises.push[0], {name: "인클라인 벤치프레스", tag: "윗가슴", sets: "3세트", reps: "8~12회", rest: "60~90초"}, {name: "덤벨 플라이", tag: "가슴 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}, baseExercises.push[3]] },
-                { day: "Day 2 — 등 집중", exercises: [baseExercises.pull[0], baseExercises.pull[1], baseExercises.pull[2], {name: "랫풀다운", tag: "광배 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}] },
-                { day: "Day 3 — 하체", exercises: [...baseExercises.legs] },
-                { day: "Day 4 — 어깨 집중", exercises: [baseExercises.push[1], baseExercises.push[2], {name: "사이드 레터럴 레이즈", tag: "측면 삼각근", sets: "3세트", reps: "8~12회", rest: "60~90초"}, {name: "페이스 풀", tag: "후면 삼각근", sets: "3세트", reps: "8~12회", rest: "60~90초"}] },
-                { day: "Day 5 — 팔 + 코어", exercises: [baseExercises.push[4], baseExercises.pull[4], ...baseExercises.core] }
+                { day: "Day 1 — 가슴 집중", exercises: pick(chestPush.length >= exCount ? chestPush : avail.push, exCount) },
+                { day: "Day 2 — 등 집중", exercises: pick(backPull.length >= exCount ? backPull : avail.pull, exCount) },
+                { day: "Day 3 — 하체", exercises: pick(avail.legs, exCount) },
+                { day: "Day 4 — 어깨 집중", exercises: pick(shoulder.length >= exCount ? shoulder : avail.push, exCount) },
+                { day: "Day 5 — 팔 + 코어", exercises: [...pick(tricep, 2), ...pick(bicep, 2), ...pick(avail.core, exCount - 4)].filter(Boolean) }
             ];
         }
 
-        let adjusted = JSON.parse(JSON.stringify(template)); 
-        adjusted.forEach(day => {
-            day.count = day.exercises.length + "종목";
-            day.exercises.forEach(ex => {
-                if(data.goal === "스트렝스") {
-                    ex.sets = "5세트"; ex.reps = "3~6회"; ex.rest = "120~180초";
-                } else if(data.goal === "다이어트") {
-                    ex.sets = "4세트"; ex.reps = "12~15회"; ex.rest = "45~60초";
-                }
-                if(data.duration === 40) ex.sets = "2~3세트";
-                else if(data.duration === 90) ex.sets = parseInt(ex.sets[0]) + 1 + "세트";
+        // ── 5. 세트 / 반복 / 휴식 프로토콜 결정 ──────────────
+        //  (ACSM·NSCA 가이드라인 기반)
+        let sets, reps, rest;
+        if (data.goal === '스트렝스') {
+            sets = 5; reps = '3~5회'; rest = '180~240초';
+        } else if (data.goal === '다이어트') {
+            sets = 3; reps = '12~15회'; rest = '45~60초';
+        } else { // 근비대
+            sets = 4; reps = '8~12회'; rest = '60~90초';
+        }
 
-                if(data.age >= 45 || data.level === "초급") {
-                    if(ex.name.includes("바벨 백스쿼트")) {
-                        ex.name = "고블릿 스쿼트 또는 파워 레그프레스";
-                        ex.tag = "안정성 강화, 부상위험 ↓"; ex.reps = "10~15회";
-                    }
-                    if(ex.name.includes("바벨 데드리프트")) {
-                        ex.name = "루마니안 데드리프트 (가벼운 중량)";
-                        ex.tag = "허리 부담 감소"; ex.reps = "10~12회";
-                    }
+        // 나이 45+ → 회복 고려: 세트 -1, 휴식 +30초
+        if (data.age >= 45) {
+            sets = Math.max(sets - 1, 2);
+            rest = rest.replace(/(\d+)/g, n => String(parseInt(n) + 30));
+        }
+        // 구력 초급 → 신경적응 단계: 세트 3으로 고정, 여유 있는 휴식
+        if (data.level === '초급') {
+            sets = Math.min(sets, 3);
+            rest = '90~120초';
+        }
+        // 운동 시간 40분 → 세트 수 감축
+        if (data.duration === 40) sets = Math.max(sets - 1, 2);
+
+        // ── 6. 각 운동에 프로토콜 + 추천 중량 적용 ────────────
+        const adjusted = JSON.parse(JSON.stringify(template));
+        adjusted.forEach(day => {
+            day.count = day.exercises.length + '종목';
+            day.exercises.forEach(ex => {
+                ex.sets = sets + '세트';
+                ex.reps = reps;
+                ex.rest = rest;
+                // 추천 중량
+                if (ex.bodyweight || ex.wRatio === 0) {
+                    ex.targetWeight = '맨몸';
+                } else {
+                    const lvlMult = data.level === '초급' ? 0.5 : data.level === '중급' ? 0.8 : 1.1;
+                    const goalMult = data.goal === '스트렝스' ? 1.15 : data.goal === '다이어트' ? 0.85 : 1.0;
+                    const raw = data.weight * ex.wRatio * lvlMult * goalMult;
+                    const kg = Math.round(raw / 2.5) * 2.5;
+                    ex.targetWeight = `${kg}kg`;
                 }
-                // 추천 중량 계산
-                ex.targetWeight = calculateWeight(ex.name, data.weight, data.level, data.goal);
             });
         });
 
-        let proteinMultiplier = data.goal === "근비대" ? 2.0 : (data.goal === "다이어트" ? 2.2 : 1.8);
-        let protein = (data.weight * proteinMultiplier).toFixed(0);
-        let surplus = data.goal === "다이어트" ? "-300~500" : (data.goal === "근비대" ? "+200~300" : "유지");
-        let carbFocus = data.goal === "다이어트" ? "단백질 중심, 정제 탄수화물 엄격히 제한" : "탄수화물 중심 (운동 전후 필수 섭취)";
+        // ── 7. 영양 가이드 계산 ────────────────────────────────
+        const proteinPerKg = data.goal === '근비대' ? 2.0 : data.goal === '다이어트' ? 2.2 : 1.8;
+        const protein = (data.weight * proteinPerKg).toFixed(0);
+        const surplus = data.goal === '다이어트' ? '-300~500' : data.goal === '근비대' ? '+200~300' : '유지';
+        const carbFocus = data.goal === '다이어트'
+            ? '단백질 중심, 정제 탄수화물 제한'
+            : '탄수화물 중심 (운동 전후 필수 섭취)';
 
-        return { routines: adjusted, nutrition: { surplus, protein, carbFocus } };
-    }
+        // ── 8. 프로파일 분석 메시지 생성 ──────────────────────
+        let profileNotes = [];
+        if (data.age >= 45) profileNotes.push('45세 이상 → 회복 시간 확보 우선, 세트 수 최적화');
+        if (data.bmi >= 25) profileNotes.push(`BMI ${data.bmi} → 관절 부하 낮은 머신/덤벨 우선 배치`);
+        if (data.bmi < 18.5) profileNotes.push('저체중 → 소모 최소화, 복합 운동 중심');
+        if (data.level === '초급') profileNotes.push('초급 → 신경적응 단계: 동작 패턴 학습 중심, 머신/덤벨 우선');
+        if (data.level === '고급') profileNotes.push('고급 → 바벨 복합 운동 최우선, 고볼륨 프로토콜 적용');
 
-    function calculateWeight(name, bw, level, goal) {
-        const n = name;
-        // 맨몸 운동
-        const bodyweight = ["플랭크", "크런치", "트라이셉스 딥스", "풀업"];
-        if (bodyweight.some(k => n.includes(k))) return "맨몸";
+        return {
+            routines: adjusted,
+            nutrition: { surplus, protein, carbFocus },
+            profileNotes
+        };
 
-        // 레벨 계수
-        const lvl = level === "초급" ? 0.5 : level === "중급" ? 0.8 : 1.1;
-        // 목표별 미세 보정 (스트렝스 ↑, 다이어트 ↓)
-        const goalMult = goal === "스트렝스" ? 1.15 : goal === "다이어트" ? 0.85 : 1.0;
-
-        let ratio;
-        if (n.includes("백스쿼트") || n.includes("레그프레스") || n.includes("고블릿"))  ratio = 1.5;
-        else if (n.includes("데드리프트") || n.includes("루마니안"))                       ratio = 1.4;
-        else if (n.includes("레그 프레스"))                                                 ratio = 1.6;
-        else if (n.includes("로우"))                                                        ratio = 0.9;
-        else if (n.includes("벤치프레스") || n.includes("인클라인"))                        ratio = 0.85;
-        else if (n.includes("오버헤드") || n.includes("숄더 프레스"))                       ratio = 0.5;
-        else if (n.includes("랫풀다운") || n.includes("케이블 크런치") || n.includes("케이블 푸시다운") || n.includes("페이스 풀")) ratio = 0.35;
-        else if (n.includes("레그 익스텐션") || n.includes("레그 컬"))                      ratio = 0.4;
-        else if (n.includes("덤벨 플라이") || n.includes("사이드 레터럴") || n.includes("덤벨 컬")) ratio = 0.15;
-        else if (n.includes("바벨 컬"))                                                     ratio = 0.25;
-        else ratio = 0.3;
-
-        const kg = Math.round((bw * lvl * ratio * goalMult) / 2.5) * 2.5; // 2.5kg 단위 반올림
-        return `${kg}kg`;
-    }
 
     function renderRoutine(data, rawInput) {
+        const notes = data.profileNotes || [];
         let html = `
         <div style="margin-bottom: 2.5rem;">
-            <h3 style="color: var(--accent-color); font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 800;">🔥 ${rawInput.goal} 표준 프로토콜 완성</h3>
+            <h3 style="color: var(--accent-color); font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 800;">🔥 ${rawInput.goal} 맞춤 루틴 완성</h3>
             <p style="color: var(--text-secondary); font-size: 1.05rem;">
-                신체 스펙 (나이 ${rawInput.age}세, BMI ${rawInput.bmi}) 및 <strong>${rawInput.level}</strong> 수준을 모두 반영한 주 ${rawInput.frequency}회 (${rawInput.duration}분) 맞춤형 구성입니다.
+                나이 <strong>${rawInput.age}세</strong> · BMI <strong>${rawInput.bmi}</strong> · <strong>${rawInput.level}</strong> 기준 &mdash; 주 ${rawInput.frequency}회 / 1회 ${rawInput.duration}분 최적화
             </p>
+            ${notes.length > 0 ? `
+            <div style="margin-top: 1rem; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 1rem 1.2rem;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.5rem;">📊 신체 프로파일 분석 결과</p>
+                ${notes.map(n => `<p style="font-size: 0.9rem; color: #a1a1aa; margin: 0.2rem 0;">• ${n}</p>`).join('')}
+            </div>` : ''}
         </div>`;
 
         data.routines.forEach((day, index) => {
