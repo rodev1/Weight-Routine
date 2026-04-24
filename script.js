@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameInput = document.getElementById('username');
     const modalTitle = document.getElementById('modal-title');
     
-    modalTitle.textContent = '가상 로그인';
+    modalTitle.textContent = 'Quick Login';
 
     let currentGeneratedRoutine = null;
     let currentGeneratedGoal = null;
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAuth() {
         const username = localStorage.getItem('mc_username');
         if (username) {
-            welcomeMsg.textContent = `${username}님 환영합니다!`;
+            welcomeMsg.textContent = `Welcome, ${username}!`;
             welcomeMsg.classList.remove('hidden');
             btnLoginModal.classList.add('hidden');
             btnLogout.classList.remove('hidden');
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLogout.addEventListener('click', () => {
         localStorage.removeItem('mc_username');
         checkAuth();
-        alert('로그아웃 되었습니다.');
+        alert('You have been logged out.');
         const saveBtn = document.getElementById('save-routine-btn');
         if(saveBtn) saveBtn.remove();
     });
@@ -60,13 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
     authForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const username = usernameInput.value.trim();
-        if(!username) return alert('닉네임을 입력해주세요.');
+        if(!username) return alert('Please enter a nickname.');
         
         localStorage.setItem('mc_username', username);
         checkAuth();
         authModal.classList.add('hidden');
         usernameInput.value = '';
-        alert('환영합니다!');
+        alert('Welcome!');
     });
 
     // --- My Routines ---
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedData = JSON.parse(localStorage.getItem('mc_routines') || '[]');
         
         if(savedData.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">저장된 루틴이 없습니다.</p>';
+            container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No saved routines yet.</p>';
             return;
         }
         
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(item.created_at).toLocaleDateString('ko-KR');
             html += `
             <div class="saved-routine-item">
-                <h3 style="color: var(--accent-color); margin-bottom: 1rem;">[${date}] ${item.goal} 프로토콜</h3>
+                <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">[${date}] ${item.goal} Protocol</h3>
             `;
             item.routine_data.routines.forEach(day => {
                 html += `<div><strong>${day.day}</strong>: ${day.exercises.map(e=>e.name).join(', ')}</div>`;
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: "덤벨 숄더 프레스", tag: "어깨·안정성", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.4 },
             { name: "바벨 오버헤드 프레스", tag: "전삼각·복합", level: 1, maxAge: 50, maxBMI: 35, wRatio: 0.5 },
             { name: "사이드 레터럴 레이즈", tag: "측면 삼각근", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.12 },
-            { name: "케이블 사이드 레이즈", tag: "측면 삼각근·일정 긴장", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.12 },
+            { name: "케이블 사���드 레이즈", tag: "측면 삼각근·일정 긴장", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.12 },
             { name: "케이블 푸시다운", tag: "삼두 고립", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.3 },
             { name: "오버헤드 덤벨 익스텐션", tag: "삼두 장두 집중", level: 0, maxAge: 99, maxBMI: 99, wRatio: 0.15 },
             { name: "트라이셉스 딥스", tag: "삼두 체중 복합", level: 1, maxAge: 55, maxBMI: 28, wRatio: 0, bodyweight: true }
@@ -335,25 +335,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderRoutine(data, rawInput) {
         const notes = data.profileNotes || [];
+        const goalMap = { '근비대': 'Hypertrophy', '다이어트': 'Fat Loss', '스트렝스': 'Strength' };
+        const levelMap = { '초급': 'Beginner', '중급': 'Intermediate', '고급': 'Advanced' };
+        
         let html = `
-        <div style="margin-bottom: 2.5rem;">
-            <h3 style="color: var(--accent-color); font-size: 1.6rem; margin-bottom: 0.5rem; font-weight: 800;">🔥 ${rawInput.goal} 맞춤 루틴 완성</h3>
-            <p style="color: var(--text-secondary); font-size: 1.05rem;">
-                나이 <strong>${rawInput.age}세</strong> · BMI <strong>${rawInput.bmi}</strong> · <strong>${rawInput.level}</strong> 기준 &mdash; 주 ${rawInput.frequency}회 / 1회 ${rawInput.duration}분 최적화
+        <div class="result-header">
+            <h3 class="result-title">${goalMap[rawInput.goal] || rawInput.goal} Protocol</h3>
+            <p class="result-subtitle">
+                Age <strong>${rawInput.age}</strong> &middot; BMI <strong>${rawInput.bmi}</strong> &middot; <strong>${levelMap[rawInput.level] || rawInput.level}</strong> &mdash; ${rawInput.frequency}x/week &middot; ${rawInput.duration} min sessions
             </p>
             ${notes.length > 0 ? `
-            <div style="margin-top: 1rem; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 1rem 1.2rem;">
-                <p style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.5rem;">📊 신체 프로파일 분석 결과</p>
-                ${notes.map(n => `<p style="font-size: 0.9rem; color: #a1a1aa; margin: 0.2rem 0;">• ${n}</p>`).join('')}
+            <div class="profile-analysis">
+                <p class="profile-analysis-title">Profile Analysis</p>
+                ${notes.map(n => `<p class="profile-analysis-item">${n}</p>`).join('')}
             </div>` : ''}
         </div>`;
 
         data.routines.forEach((day, index) => {
             html += `
-            <div class="day-card" style="animation-delay: ${index * 0.1}s">
+            <div class="day-card" style="animation-delay: ${index * 0.08}s">
                 <div class="day-header">
                     ${day.day} 
-                    <span style="font-size: 0.9rem; color: #a1a1aa; font-weight: 400; margin-left: auto; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 4px;">${day.count}</span>
+                    <span class="count-badge">${day.count}</span>
                 </div>
                 <div class="exercise-list">
                     ${day.exercises.map(ex => `
@@ -366,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="meta-item"><span class="meta-label">Sets</span><span class="meta-value">${ex.sets}</span></div>
                                 <div class="meta-item"><span class="meta-label">Reps</span><span class="meta-value">${ex.reps}</span></div>
                                 <div class="meta-item"><span class="meta-label">Rest</span><span class="meta-value">${ex.rest}</span></div>
-                                <div class="meta-item"><span class="meta-label">추천 중량</span><span class="meta-value weight-highlight">${ex.targetWeight}</span></div>
+                                <div class="meta-item"><span class="meta-label">Weight</span><span class="meta-value weight-highlight">${ex.targetWeight}</span></div>
                             </div>
                         </div>
                     `).join('')}
@@ -375,14 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         html += `
-        <div class="nutrition-card" style="animation-delay: ${data.routines.length * 0.1 + 0.1}s; animation: slideUp 0.4s ease-out forwards; opacity: 0;">
+        <div class="nutrition-card" style="animation-delay: ${data.routines.length * 0.08 + 0.1}s; animation: slideUp 0.4s ease-out forwards; opacity: 0;">
             <div class="nutrition-title">
-                📋 정밀 영양 가이드
+                Nutrition Guide
             </div>
             <div class="nutrition-content">
-                • <strong>칼로리 설정:</strong> 유지 칼로리 기준 <strong>${data.nutrition.surplus} kcal</strong> 잉여 섭취<br>
-                • <strong>목표 단백질:</strong> 하루 약 <strong>${data.nutrition.protein}g</strong> 섭취 권장 (체중 × ${data.goal === '근비대'? '2.0~2.2':'1.8~2.2'}g)<br>
-                • <strong>식단 포인트:</strong> ${data.nutrition.carbFocus}
+                <strong>Calorie Target:</strong> Maintenance ${data.nutrition.surplus} kcal<br>
+                <strong>Protein Goal:</strong> ~<strong>${data.nutrition.protein}g</strong>/day (${rawInput.goal === '근비대'? '2.0-2.2':'1.8-2.2'}g per kg)<br>
+                <strong>Diet Focus:</strong> ${data.nutrition.carbFocus}
             </div>
         </div>
         `;
@@ -394,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const saveBtn = document.createElement('button');
             saveBtn.id = 'save-routine-btn';
             saveBtn.className = 'save-routine-btn';
-            saveBtn.textContent = '이 루틴 로컬 기기에 저장하기';
+            saveBtn.textContent = 'Save This Routine';
             
             saveBtn.addEventListener('click', () => {
                 const savedRoutines = JSON.parse(localStorage.getItem('mc_routines') || '[]');
@@ -404,8 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     created_at: new Date().toISOString()
                 });
                 localStorage.setItem('mc_routines', JSON.stringify(savedRoutines));
-                alert('해당 기기에 루틴이 안전하게 보관되었습니다!');
-                saveBtn.textContent = '저장됨 ✓';
+                alert('Routine saved successfully!');
+                saveBtn.textContent = 'Saved';
                 saveBtn.disabled = true;
             });
             routineContent.appendChild(saveBtn);
