@@ -146,42 +146,61 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function generateClaudeStyleRoutine(data) {
-        const template = [
-            {
-                day: "Day 1 — 밀기 (가슴/어깨/삼두)",
-                count: "5종목",
-                exercises: [
-                    {name: "트라이셉스 딥스", tag: "삼두 체중 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "바벨 오버헤드 프레스", tag: "전삼각·복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "덤벨 숄더 프레스", tag: "안정성 요구", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "바벨 벤치프레스", tag: "다관절·주동근, 프리웨이트", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "바벨 컬", tag: "이두 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-                ]
-            },
-            {
-                day: "Day 2 — 당기기 (등/이두)",
-                count: "4종목",
-                exercises: [
-                    {name: "트라이셉스 딥스", tag: "삼두 체중 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "풀업 (가중)", tag: "광배·복합 다관절", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "바벨 데드리프트", tag: "전신 복합, 고급자 권장", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "바벨 컬", tag: "이두 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-                ]
-            },
-            {
-                day: "Day 3 — 하체 + 코어",
-                count: "4종목",
-                exercises: [
-                    {name: "바벨 백스쿼트", tag: "하체 대표 복합, 고급자 권장", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "케이블 크런치", tag: "복직근 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "레그 프레스", tag: "머신·무릎 부담 ↓", sets: "3세트", reps: "8~12회", rest: "60~90초"},
-                    {name: "플랭크", tag: "코어 안정화", sets: "3세트", reps: "8~12회", rest: "60~90초"}
-                ]
-            }
-        ];
+        let baseExercises = {
+            push: [
+                {name: "바벨 벤치프레스", tag: "다관절·주동근", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "바벨 오버헤드 프레스", tag: "전삼각·복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "덤벨 숄더 프레스", tag: "안정성 요구", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "트라이셉스 딥스", tag: "삼두 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "케이블 푸시다운", tag: "삼두 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}
+            ],
+            pull: [
+                {name: "풀업 (가중)", tag: "광배·복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "바벨 로우", tag: "등 두께", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "바벨 데드리프트", tag: "전신 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "바벨 컬", tag: "이두 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "덤벨 컬", tag: "이두 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}
+            ],
+            legs: [
+                {name: "바벨 백스쿼트", tag: "하체 복합", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "레그 프레스", tag: "머신·대퇴", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "레그 익스텐션", tag: "대퇴사두 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "레그 컬", tag: "햄스트링 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}
+            ],
+            core: [
+                {name: "케이블 크런치", tag: "복직근 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"},
+                {name: "플랭크", tag: "코어 안정화", sets: "3세트", reps: "8~12회", rest: "60~90초"}
+            ]
+        };
+
+        let template = [];
+        
+        if (data.frequency === 3) {
+            template = [
+                { day: "Day 1 — 밀기 (가슴/어깨/삼두)", exercises: [...baseExercises.push] },
+                { day: "Day 2 — 당기기 (등/이두)", exercises: [...baseExercises.pull] },
+                { day: "Day 3 — 하체 + 코어", exercises: [...baseExercises.legs, ...baseExercises.core] }
+            ];
+        } else if (data.frequency === 4) {
+            template = [
+                { day: "Day 1 — 상체 (밀기 중심)", exercises: [baseExercises.push[0], baseExercises.push[1], baseExercises.pull[0], baseExercises.push[3], baseExercises.pull[3]] },
+                { day: "Day 2 — 하체 + 코어", exercises: [...baseExercises.legs, ...baseExercises.core] },
+                { day: "Day 3 — 상체 (당기기 중심)", exercises: [baseExercises.pull[1], baseExercises.pull[2], baseExercises.push[2], baseExercises.pull[4], baseExercises.push[4]] },
+                { day: "Day 4 — 하체 집중", exercises: [...baseExercises.legs] }
+            ];
+        } else if (data.frequency === 5) {
+            template = [
+                { day: "Day 1 — 가슴 집중", exercises: [baseExercises.push[0], {name: "인클라인 벤치프레스", tag: "윗가슴", sets: "3세트", reps: "8~12회", rest: "60~90초"}, {name: "덤벨 플라이", tag: "가슴 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}, baseExercises.push[3]] },
+                { day: "Day 2 — 등 집중", exercises: [baseExercises.pull[0], baseExercises.pull[1], baseExercises.pull[2], {name: "랫풀다운", tag: "광배 고립", sets: "3세트", reps: "8~12회", rest: "60~90초"}] },
+                { day: "Day 3 — 하체", exercises: [...baseExercises.legs] },
+                { day: "Day 4 — 어깨 집중", exercises: [baseExercises.push[1], baseExercises.push[2], {name: "사이드 레터럴 레이즈", tag: "측면 삼각근", sets: "3세트", reps: "8~12회", rest: "60~90초"}, {name: "페이스 풀", tag: "후면 삼각근", sets: "3세트", reps: "8~12회", rest: "60~90초"}] },
+                { day: "Day 5 — 팔 + 코어", exercises: [baseExercises.push[4], baseExercises.pull[4], ...baseExercises.core] }
+            ];
+        }
 
         let adjusted = JSON.parse(JSON.stringify(template)); 
         adjusted.forEach(day => {
+            day.count = day.exercises.length + "종목";
             day.exercises.forEach(ex => {
                 if(data.goal === "스트렝스") {
                     ex.sets = "5세트"; ex.reps = "3~6회"; ex.rest = "120~180초";
